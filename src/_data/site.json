@@ -8,5 +8,16 @@
   "linkedin": "https://www.linkedin.com/in/ritam-dhara-7b6179272/",
   "portfolio": "",
   "newsletterSignupUrl": "",
-  "topics": ["Global Markets", "Finance", "Marketing", "Strategy", "Operations", "HR & Leadership", "Economics", "Careers"]
+  "topics": [
+    "Global Markets",
+    "Finance",
+    "Marketing",
+    "Strategy",
+    "Operations",
+    "HR & Leadership",
+    "Economics",
+    "Careers"
+  ],
+  "repo": "ritam45-debug/GrilledMba",
+  "branch": "main"
 }

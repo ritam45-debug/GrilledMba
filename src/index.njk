@@ -2,15 +2,16 @@
 layout: base.njk
 title: GrilledMba
 ---
-<section class="hero">
+<section class="hero"><div class="embers" aria-hidden="true">{% for i in range(0,14) %}<i style="--i:{{ i }}"></i>{% endfor %}</div>
   <div class="wrap hero-grid">
     <div>
       <p class="kicker">Est. {{ "" | year }} · Written from Chennai</p>
-      <h1>Global markets and MBA ideas, <span class="ember">served hot.</span></h1>
+      <h1 class="hero-title"><span class="line">Global markets and</span> <span class="line">MBA ideas, <span class="ember sizzle">served hot.</span></span></h1>
       <p class="dek">Articles and newsletters on what is moving markets and business across finance, marketing, strategy, operations and HR — plus the honest, unpolished side of life in B-school, in words and short videos.</p>
       <div class="hero-actions">
         <a class="btn" href="/newsletter/">Read the newsletter</a>
         <a class="btn ghost" href="/articles/">Browse articles</a>
+        <a class="btn ghost" href="/write/">✍ Write blog post</a>
       </div>
     </div>
     <ul class="menu-board" aria-label="What's on the menu">
@@ -34,7 +35,7 @@ title: GrilledMba
         <p class="kicker"><span>{{ lead.data.type | typeLabel }}</span>{% if lead.data.issue %}<span>Issue #{{ lead.data.issue }}</span>{% endif %}{% if lead.data.topic %}<span>{{ lead.data.topic }}</span>{% endif %}</p>
         <h3>{{ lead.data.title }}</h3>
         {% if lead.data.excerpt %}<p class="dek">{{ lead.data.excerpt }}</p>{% endif %}
-        <p class="meta"><time datetime="{{ lead.date | isoDate }}">{{ lead.date | readable }}</time> · Read →</p>
+        <p class="meta">{{ lead.data.author or site.author }} · <time datetime="{{ lead.date | isoDate }}">{{ lead.date | readable }}</time> · Read →</p>
       </a>
     </article>
     {% set rest = collections.posts | take(7) %}

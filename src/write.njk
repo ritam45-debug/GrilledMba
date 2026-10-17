@@ -1,0 +1,214 @@
+---
+layout: base.njk
+title: Write a blog post
+permalink: /write/
+noindex: true
+---
+<link rel="stylesheet" href="/assets/vendor/toastui-editor.css">
+<link rel="stylesheet" href="/assets/vendor/toastui-editor-dark.css">
+
+<section class="wrap page-head reveal">
+  <p class="kicker">Dashboard</p>
+  <h1>Write a blog post</h1>
+  <p class="dek">Write like WordPress, publish to GrilledMba. Your draft saves in this browser automatically.</p>
+</section>
+
+<form id="wp" class="wrap wp-shell" novalidate>
+  <div class="wp-main">
+    <label class="sr" for="f-title">Title</label>
+    <input id="f-title" class="wp-title" type="text" placeholder="Add title" required autocomplete="off">
+    <div id="editor" class="wp-editor"></div>
+    <textarea id="fallback" class="wp-fallback" hidden placeholder="Write your post in Markdown…"></textarea>
+    <label class="wp-label" for="f-excerpt">Excerpt <span class="muted">— one or two lines shown on cards</span></label>
+    <textarea id="f-excerpt" rows="2" maxlength="300"></textarea>
+  </div>
+
+  <aside class="wp-side">
+    <div class="wp-box">
+      <h2>Publish</h2>
+      <p class="muted small" id="status">Draft not saved yet.</p>
+      <div class="wp-actions">
+        <button type="button" class="btn ghost" id="b-preview">Preview</button>
+        <button type="submit" class="btn" id="b-publish">Publish</button>
+      </div>
+      <button type="button" class="linkish" id="b-download">Download as .md</button>
+      <button type="button" class="linkish danger" id="b-clear">Clear draft</button>
+    </div>
+
+    <div class="wp-box">
+      <h2>Author</h2>
+      <label class="wp-label" for="f-author">Author name *</label>
+      <input id="f-author" type="text" required autocomplete="name" placeholder="{{ site.author }}">
+      <label class="wp-label" for="f-email">Author email *</label>
+      <input id="f-email" type="email" required autocomplete="email" placeholder="you@example.com">
+      <label class="wp-check"><input type="checkbox" id="f-showemail"> Show email on the post as a contact link</label>
+      <p class="muted small">Posts are stored in a public GitHub repo, so anything you enter here is public.</p>
+    </div>
+
+    <div class="wp-box">
+      <h2>Post settings</h2>
+      <label class="wp-label" for="f-type">Section</label>
+      <select id="f-type">
+        <option value="article">Article</option>
+        <option value="newsletter">Newsletter issue</option>
+        <option value="life">Life &amp; Lessons</option>
+        <option value="video">Video</option>
+      </select>
+      <div id="row-issue">
+        <label class="wp-label" for="f-issue">Issue number</label>
+        <input id="f-issue" type="number" min="1" step="1">
+      </div>
+      <label class="wp-label" for="f-topic">Category</label>
+      <select id="f-topic">
+        {% for t in site.topics %}<option>{{ t }}</option>{% endfor %}
+      </select>
+      <label class="wp-label" for="f-date">Publish date</label>
+      <input id="f-date" type="date">
+    </div>
+
+    <div class="wp-box">
+      <h2>Featured media</h2>
+      <label class="wp-label" for="f-cover">Featured image URL</label>
+      <input id="f-cover" type="url" placeholder="https://…/image.jpg">
+      <img id="cover-preview" alt="" hidden>
+      <label class="wp-label" for="f-youtube">YouTube link <span class="muted">(videos)</span></label>
+      <input id="f-youtube" type="url" placeholder="https://youtu.be/… or /shorts/…">
+    </div>
+
+    <div class="wp-box">
+      <h2>Sources</h2>
+      <label class="wp-label" for="f-sources">One per line: <code>Title | URL</code></label>
+      <textarea id="f-sources" rows="4" placeholder="RBI policy statement | https://rbi.org.in/…"></textarea>
+    </div>
+  </aside>
+</form>
+
+<dialog id="publish-dlg" class="wp-dialog">
+  <h2>Almost live</h2>
+  <p id="dlg-msg"></p>
+  <ol class="small">
+    <li>A GitHub tab opens with your post ready as a new file.</li>
+    <li>Click the green <strong>Commit changes</strong> button.</li>
+    <li>Your post appears on GrilledMba in about a minute.</li>
+  </ol>
+  <p class="muted small">Not a collaborator on the repo? GitHub will offer to send it as a proposal, which the site owner can approve.</p>
+  <div class="wp-actions"><button class="btn" id="dlg-ok" type="button">Got it</button></div>
+</dialog>
+
+<dialog id="preview-dlg" class="wp-dialog wp-preview">
+  <div class="prose" id="preview-body"></div>
+  <div class="wp-actions"><button class="btn ghost" id="prev-close" type="button">Close preview</button></div>
+</dialog>
+
+<script src="/assets/vendor/toastui-editor.js"></script>
+<script id="wp-config" type="application/json">{"repo": {{ site.repo | dump | safe }}, "branch": {{ site.branch | dump | safe }}}</script>
+{% raw %}<script>
+(function () {
+  var CFG = JSON.parse(document.getElementById("wp-config").textContent);
+  var REPO = CFG.repo, BRANCH = CFG.branch;
+  var KEY = "gm-write-draft";
+  // Template guards so {{ }} in a post can't break the site build
+  var RAW_OPEN = "{" + "% raw %" + "}", RAW_CLOSE = "{" + "% end" + "raw %" + "}";
+  var $ = function (id) { return document.getElementById(id); };
+  var fields = ["title","excerpt","author","email","showemail","type","issue","topic","date","cover","youtube","sources"];
+  var dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+
+  // Editor (falls back to a plain textarea if the script didn't load)
+  var editor = null;
+  try {
+    editor = new window.ToastEditor({
+      el: $("editor"), height: "560px", initialEditType: "wysiwyg", previewStyle: "tab",
+      placeholder: "Start writing, or type to begin…", usageStatistics: false, theme: dark ? "dark" : "light",
+      toolbarItems: [["heading","bold","italic","strike"],["hr","quote"],["ul","ol","task"],["table","link","image"],["code","codeblock"]],
+      hooks: { addImageBlobHook: function (blob, cb) {
+        var url = prompt("Paste an image URL (uploaded images aren't supported here):");
+        if (url) cb(url, "image");
+      } }
+    });
+  } catch (e) { $("editor").hidden = true; $("fallback").hidden = false; }
+  var getBody = function () { return editor ? editor.getMarkdown() : $("fallback").value; };
+  var setBody = function (v) { if (editor) editor.setMarkdown(v || "", false); else $("fallback").value = v || ""; };
+
+  // Draft save / restore
+  function read() {
+    var d = {}; fields.forEach(function (f) { var el = $("f-" + f); d[f] = el.type === "checkbox" ? el.checked : el.value; });
+    d.body = getBody(); return d;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(read())); $("status").textContent = "Draft saved " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}); } catch (e) {}
+  }
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved) { fields.forEach(function (f) { var el = $("f-" + f); if (saved[f] == null) return; if (el.type === "checkbox") el.checked = saved[f]; else el.value = saved[f]; }); setBody(saved.body); $("status").textContent = "Draft restored."; }
+  } catch (e) {}
+  if (!$("f-date").value) $("f-date").value = new Date().toISOString().slice(0, 10);
+  var t; function queue() { clearTimeout(t); t = setTimeout(save, 600); }
+  document.getElementById("wp").addEventListener("input", queue);
+  if (editor) editor.on("change", queue); else $("fallback").addEventListener("input", queue);
+
+  // Section-dependent fields
+  function sync() { $("row-issue").hidden = $("f-type").value !== "newsletter"; }
+  $("f-type").addEventListener("change", sync); sync();
+  $("f-cover").addEventListener("input", function () { var v = this.value.trim(), img = $("cover-preview"); img.hidden = !/^https?:\/\//.test(v); if (!img.hidden) img.src = v; });
+  $("f-cover").dispatchEvent(new Event("input"));
+
+  // Build the post file
+  var slug = function (s) { return s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) || "post"; };
+  var q = function (s) { return JSON.stringify(String(s)); };
+  function ytId(u) { var m = String(u).match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/); return m ? m[1] : ""; }
+  function build() {
+    var d = read();
+    var fm = ["---", "title: " + q(d.title.trim()), "type: " + d.type];
+    if (d.type === "newsletter" && d.issue) fm.push("issue: " + parseInt(d.issue, 10));
+    fm.push("topic: " + q(d.topic), "author: " + q(d.author.trim()), "authorEmail: " + q(d.email.trim()), "showEmail: " + (d.showemail ? "true" : "false"));
+    if (d.excerpt.trim()) fm.push("excerpt: " + q(d.excerpt.trim().replace(/\s+/g, " ")));
+    fm.push("date: " + d.date);
+    if (d.cover.trim()) fm.push("cover: " + q(d.cover.trim()));
+    var y = ytId(d.youtube); if (y) fm.push("youtube: " + q(y));
+    var src = d.sources.split("\n").map(function (l) { var p = l.split("|"); return p.length > 1 ? { t: p[0].trim(), u: p.slice(1).join("|").trim() } : null; }).filter(function (x) { return x && x.u; });
+    if (src.length) { fm.push("sources:"); src.forEach(function (s) { fm.push("  - title: " + q(s.t || s.u)); fm.push("    url: " + q(s.u)); }); }
+    fm.push("---", "");
+    return { name: d.date + "-" + slug(d.title) + ".md", text: fm.join("\n") + RAW_OPEN + "\n" + d.body.trim() + "\n" + RAW_CLOSE + "\n" };
+  }
+  function check() {
+    var d = read(), miss = [];
+    if (!d.title.trim()) miss.push("title"); if (!d.author.trim()) miss.push("author name");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) miss.push("a valid author email");
+    if (!d.body.trim() && !ytId(d.youtube)) miss.push("some content");
+    if (miss.length) { alert("Please add " + miss.join(", ") + " before publishing."); return false; }
+    return true;
+  }
+
+  // Publish → GitHub "new file" page, prefilled
+  document.getElementById("wp").addEventListener("submit", function (e) {
+    e.preventDefault(); if (!check()) return; save();
+    var f = build(), base = "https://github.com/" + REPO + "/new/" + BRANCH + "?filename=" + encodeURIComponent("src/posts/" + f.name);
+    var full = base + "&value=" + encodeURIComponent(f.text);
+    if (full.length < 7500) { window.open(full, "_blank", "noopener"); $("dlg-msg").textContent = "Your post “" + read().title + "” is filled in on GitHub."; }
+    else {
+      try { navigator.clipboard.writeText(f.text); } catch (err) {}
+      window.open(base, "_blank", "noopener");
+      $("dlg-msg").textContent = "This post is long, so it was copied to your clipboard. On GitHub, click in the big editor box and paste (Ctrl/Cmd + V).";
+    }
+    $("publish-dlg").showModal();
+  });
+  $("dlg-ok").onclick = function () { $("publish-dlg").close(); };
+  $("b-download").onclick = function () {
+    if (!check()) return; var f = build(), a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([f.text], { type: "text/markdown" })); a.download = f.name; a.click();
+  };
+  $("b-clear").onclick = function () {
+    if (!confirm("Clear this draft? This can't be undone.")) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    fields.forEach(function (f) { var el = $("f-" + f); if (el.type === "checkbox") el.checked = false; else if (el.tagName !== "SELECT") el.value = ""; });
+    setBody(""); $("f-date").value = new Date().toISOString().slice(0, 10); $("status").textContent = "Draft cleared."; sync();
+  };
+  $("b-preview").onclick = function () {
+    var d = read(), html = editor ? editor.getHTML() : d.body.replace(/</g, "&lt;").replace(/\n/g, "<br>");
+    var head = "<p class='kicker'>" + d.topic + "</p><h1>" + (d.title || "Untitled").replace(/</g, "&lt;") + "</h1><p class='byline'>By " + (d.author || "—").replace(/</g, "&lt;") + "</p>";
+    var cover = /^https?:\/\//.test(d.cover) ? "<img src='" + d.cover.replace(/'/g, "%27") + "' alt=''>" : "";
+    $("preview-body").innerHTML = head + cover + html; $("preview-dlg").showModal();
+  };
+  $("prev-close").onclick = function () { $("preview-dlg").close(); };
+})();
+</script>{% endraw %}

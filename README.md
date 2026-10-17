@@ -43,3 +43,9 @@ Edit `src/_data/site.json` — tagline, bio, LinkedIn, portfolio link, the topic
 npm install
 npm start      # http://localhost:8080/GrilledMba/
 ```
+
+## Writing from the website (WordPress-style)
+
+Open **Write blog post** in the site menu (`/write/`). Add a title, write in the visual editor, then fill in author name, author email, section, category, featured image and sources. Click **Publish**: a GitHub tab opens with the post ready as a new file, and you click **Commit changes**. The site updates in about a minute. Drafts save in your browser automatically.
+
+People without write access to the repo can still use the page; GitHub offers to send their post as a pull request for you to approve.

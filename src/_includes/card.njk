@@ -11,7 +11,7 @@
       <p class="kicker"><span>{{ p.data.type | typeLabel }}</span>{% if p.data.topic %}<span>{{ p.data.topic }}</span>{% endif %}</p>
       <h3>{{ p.data.title }}</h3>
       {% if p.data.excerpt %}<p class="muted">{{ p.data.excerpt }}</p>{% endif %}
-      <p class="meta"><time datetime="{{ p.date | isoDate }}">{{ p.date | readable }}</time></p>
+      <p class="meta">{{ p.data.author or site.author }} · <time datetime="{{ p.date | isoDate }}">{{ p.date | readable }}</time></p>
     </div>
   </a>
 </article>

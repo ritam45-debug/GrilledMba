@@ -10,7 +10,7 @@ layout: base.njk
     </p>
     <h1>{{ title }}</h1>
     {% if excerpt %}<p class="dek">{{ excerpt }}</p>{% endif %}
-    <p class="byline">By {{ site.author }} · <time datetime="{{ page.date | isoDate }}">{{ page.date | readable }}</time> · {{ content | readingTime }}</p>
+    <p class="byline"><span class="avatar" aria-hidden="true">{{ (author or site.author) | first | upper }}</span>By <strong>{{ author or site.author }}</strong>{% if showEmail and authorEmail %} · <a href="mailto:{{ authorEmail }}">{{ authorEmail }}</a>{% endif %} · <time datetime="{{ page.date | isoDate }}">{{ page.date | readable }}</time> · {{ content | readingTime }}</p>
   </header>
 
   {% if youtube %}

@@ -1,0 +1,77 @@
+---
+layout: base.njk
+title: GrilledMba
+---
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="kicker">Est. {{ "" | year }} · Written from Chennai</p>
+      <h1>Global markets and MBA ideas, <span class="ember">served hot.</span></h1>
+      <p class="dek">Articles and newsletters on what is moving markets and business across finance, marketing, strategy, operations and HR — plus the honest, unpolished side of life in B-school, in words and short videos.</p>
+      <div class="hero-actions">
+        <a class="btn" href="/newsletter/">Read the newsletter</a>
+        <a class="btn ghost" href="/articles/">Browse articles</a>
+      </div>
+    </div>
+    <ul class="menu-board" aria-label="What's on the menu">
+      <li><span>01</span><a href="/articles/"><strong>Articles</strong> Deep dives on markets &amp; MBA fields</a></li>
+      <li><span>02</span><a href="/newsletter/"><strong>Newsletter</strong> Regular issues, one theme each</a></li>
+      <li><span>03</span><a href="/life/"><strong>Life &amp; Lessons</strong> Personal experiences, unfiltered</a></li>
+      <li><span>04</span><a href="/videos/"><strong>Videos</strong> Short clips and quick takes</a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="section-head row">
+    <h2>Fresh off the grill</h2>
+    <a class="more" href="/articles/">All articles →</a>
+  </div>
+  {% if collections.posts.length %}
+    {% set lead = collections.posts[0] %}
+    <article class="lead-story">
+      <a href="{{ lead.url }}">
+        <p class="kicker"><span>{{ lead.data.type | typeLabel }}</span>{% if lead.data.issue %}<span>Issue #{{ lead.data.issue }}</span>{% endif %}{% if lead.data.topic %}<span>{{ lead.data.topic }}</span>{% endif %}</p>
+        <h3>{{ lead.data.title }}</h3>
+        {% if lead.data.excerpt %}<p class="dek">{{ lead.data.excerpt }}</p>{% endif %}
+        <p class="meta"><time datetime="{{ lead.date | isoDate }}">{{ lead.date | readable }}</time> · Read →</p>
+      </a>
+    </article>
+    {% set rest = collections.posts | take(7) %}
+    {% if rest.length > 1 %}
+    <div class="grid">
+      {% for p in rest %}{% if not loop.first %}{% include "card.njk" %}{% endif %}{% endfor %}
+    </div>
+    {% endif %}
+  {% endif %}
+</section>
+
+<section class="wrap split">
+  <div>
+    <div class="section-head row"><h2>Life &amp; Lessons</h2><a class="more" href="/life/">More →</a></div>
+    {% if collections.life.length %}
+      <ul class="headline-list">
+        {% for p in collections.life | take(4) %}<li><a href="{{ p.url }}">{{ p.data.title }}</a><time datetime="{{ p.date | isoDate }}">{{ p.date | readable }}</time></li>{% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Stories from classrooms, case comps, placements and hostel life are coming soon.</p>
+    {% endif %}
+  </div>
+  <div>
+    <div class="section-head row"><h2>Videos</h2><a class="more" href="/videos/">More →</a></div>
+    {% if collections.video.length %}
+      <div class="grid grid-tight">{% for p in collections.video | take(2) %}{% include "card.njk" %}{% endfor %}</div>
+    {% else %}
+      <p class="empty">Short videos and quick takes are coming soon.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="section-head"><h2>Browse by field</h2></div>
+  <div class="chips">
+    {% for t in site.topics %}<a class="chip" href="/topics/{{ t | slug2 }}/">{{ t }}</a>{% endfor %}
+  </div>
+</section>
+
+<section class="wrap">{% include "subscribe.njk" %}</section>

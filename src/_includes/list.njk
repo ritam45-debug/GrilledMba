@@ -1,0 +1,22 @@
+---
+layout: base.njk
+---
+<section class="wrap section-head page-head">
+  <p class="kicker">{{ kicker }}</p>
+  <h1>{{ title }}</h1>
+  <p class="dek">{{ intro }}</p>
+</section>
+<section class="wrap">
+  {{ content | safe }}
+  {% set items = collections[collectionName] %}
+  {% if items and items.length %}
+    <div class="grid">
+      {% for p in items %}{% include "card.njk" %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">
+      <p class="kicker">Warming up the grill</p>
+      <p>{{ emptyText }}</p>
+    </div>
+  {% endif %}
+</section>

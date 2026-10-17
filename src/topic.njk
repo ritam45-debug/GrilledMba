@@ -1,0 +1,22 @@
+---
+layout: base.njk
+pagination:
+  data: site.topics
+  size: 1
+  alias: topicName
+permalink: "/topics/{{ topicName | slug2 }}/"
+eleventyComputed:
+  title: "{{ topicName }}"
+---
+<section class="wrap section-head page-head">
+  <p class="kicker"><a href="/topics/">Topics</a></p>
+  <h1>{{ topicName }}</h1>
+</section>
+<section class="wrap">
+  {% set match = collections.topicList | findTopic(topicName) %}
+  {% if match %}
+    <div class="grid">{% for p in match.posts %}{% include "card.njk" %}{% endfor %}</div>
+  {% else %}
+    <div class="empty"><p class="kicker">Warming up the grill</p><p>Nothing filed under {{ topicName }} yet.</p></div>
+  {% endif %}
+</section>

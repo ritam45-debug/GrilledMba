@@ -1,0 +1,21 @@
+---
+layout: base.njk
+title: Topics
+permalink: /topics/
+---
+<section class="wrap section-head page-head">
+  <p class="kicker">Browse</p>
+  <h1>Topics</h1>
+  <p class="dek">Every piece is filed under one field of the MBA.</p>
+</section>
+<section class="wrap">
+  <div class="topic-grid">
+    {% for t in site.topics %}
+      {% set found = collections.topicList | findTopic(t) %}
+      <a class="topic-tile" href="/topics/{{ t | slug2 }}/">
+        <strong>{{ t }}</strong>
+        <span class="muted">{% if found %}{{ found.posts.length }} piece{% if found.posts.length != 1 %}s{% endif %}{% else %}Coming soon{% endif %}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>

@@ -1,0 +1,17 @@
+<article class="card card-{{ p.data.type }}">
+  <a class="card-link" href="{{ p.url }}">
+    {% if p.data.youtube %}
+      <div class="card-media"><img src="https://i.ytimg.com/vi/{{ p.data.youtube }}/hqdefault.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true">▶</span></div>
+    {% elif p.data.cover %}
+      <div class="card-media"><img src="{{ p.data.cover }}" alt="" loading="lazy"></div>
+    {% elif p.data.video %}
+      <div class="card-media card-media-blank"><span class="play" aria-hidden="true">▶</span></div>
+    {% endif %}
+    <div class="card-body">
+      <p class="kicker"><span>{{ p.data.type | typeLabel }}</span>{% if p.data.topic %}<span>{{ p.data.topic }}</span>{% endif %}</p>
+      <h3>{{ p.data.title }}</h3>
+      {% if p.data.excerpt %}<p class="muted">{{ p.data.excerpt }}</p>{% endif %}
+      <p class="meta"><time datetime="{{ p.date | isoDate }}">{{ p.date | readable }}</time></p>
+    </div>
+  </a>
+</article>

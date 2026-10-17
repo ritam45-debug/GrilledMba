@@ -1,0 +1,42 @@
+---
+layout: base.njk
+---
+<article class="post wrap-narrow">
+  <header class="post-head">
+    <p class="kicker">
+      <a href="{{ type | typePage }}">{{ type | typeLabel }}</a>
+      {% if issue %}<span>Issue #{{ issue }}</span>{% endif %}
+      {% if topic %}<a href="/topics/{{ topic | slug2 }}/">{{ topic }}</a>{% endif %}
+    </p>
+    <h1>{{ title }}</h1>
+    {% if excerpt %}<p class="dek">{{ excerpt }}</p>{% endif %}
+    <p class="byline">By {{ site.author }} · <time datetime="{{ page.date | isoDate }}">{{ page.date | readable }}</time> · {{ content | readingTime }}</p>
+  </header>
+
+  {% if youtube %}
+  <div class="video-frame">
+    <iframe src="https://www.youtube-nocookie.com/embed/{{ youtube }}" title="{{ title }}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+  {% elif video %}
+  <div class="video-frame">
+    <video controls preload="metadata" playsinline {% if poster %}poster="{{ poster }}"{% endif %}><source src="{{ video }}"></video>
+  </div>
+  {% elif cover %}
+  <figure class="cover"><img src="{{ cover }}" alt="{{ coverAlt or '' }}"></figure>
+  {% endif %}
+
+  <div class="prose">
+    {{ content | safe }}
+  </div>
+
+  {% if sources %}
+  <section class="sources">
+    <h2>Sources</h2>
+    <ol>
+      {% for s in sources %}<li><a href="{{ s.url }}" rel="noopener">{{ s.title }}</a></li>{% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  {% include "subscribe.njk" %}
+</article>
